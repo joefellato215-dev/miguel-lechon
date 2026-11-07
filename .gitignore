@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local runtime files
+*.log
+*.pid
+
+# Local database
+miguel_lechon.db
+
+# Local audit/test artifacts
+.predeploy_audit/
+.admin_check.js
+miguel_auth_test.log
+miguel_auth_test.pid
+
+# Development/reference files
+index.html.before_real_images
+
+# Protected backups
+backups/
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+
+# Termux/editor/system files
+.DS_Store

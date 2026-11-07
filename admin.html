@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <meta
+    name="robots"
+    content="noindex,nofollow"
+  >
+
+  <title>Miguel Lechon — Admin Orders</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background: #fff8ec;
+      color: #1f1a17;
+    }
+
+    .status-new {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-processing {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="sticky top-0 z-20 border-b border-black/10 bg-[#8B1E1E] text-white shadow-lg">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#E0A030]">
+          Miguel Lechon
+        </p>
+        <h1 class="text-xl font-bold">
+          Order Dashboard
+        </h1>
+      </div>
+
+      <button
+        id="refreshButton"
+        type="button"
+        class="rounded-xl bg-[#E0A030] px-4 py-2 text-sm font-bold text-[#1F1A17] shadow-sm transition hover:brightness-105 active:scale-95"
+      >
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-6">
+
+    <section class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-black/50">
+          Total
+        </p>
+        <p id="totalCount" class="mt-1 text-2xl font-bold text-[#8B1E1E]">
+          0
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-black/50">
+          New
+        </p>
+        <p id="newCount" class="mt-1 text-2xl font-bold text-[#8B1E1E]">
+          0
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-black/50">
+          Processing
+        </p>
+        <p id="processingCount" class="mt-1 text-2xl font-bold text-blue-700">
+          0
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-black/50">
+          Completed
+        </p>
+        <p id="completedCount" class="mt-1 text-2xl font-bold text-green-700">
+          0
+        </p>
+      </div>
+    </section>
+
+    <section class="mb-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <label
+        for="statusFilter"
+        class="mb-2 block text-sm font-bold"
+      >
+        Filter orders
+      </label>
+
+      <select
+        id="statusFilter"
+        class="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#8B1E1E] sm:max-w-xs"
+      >
+        <option value="ALL">All orders</option>
+        <option value="NEW">New</option>
+        <option value="PROCESSING">Processing</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </section>
+
+    <div
+      id="dashboardStatus"
+      class="mb-5 hidden rounded-xl p-4 text-sm font-semibold"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <section>
+      <div
+        id="ordersList"
+        class="space-y-4"
+      ></div>
+
+      <div
+        id="emptyState"
+        class="hidden rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5"
+      >
+        <p class="text-lg font-bold text-[#8B1E1E]">
+          No orders found
+        </p>
+
+        <p class="mt-2 text-sm text-black/60">
+          New order inquiries will appear here.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const ordersList = document.getElementById("ordersList");
+    const emptyState = document.getElementById("emptyState");
+    const dashboardStatus = document.getElementById("dashboardStatus");
+    const refreshButton = document.getElementById("refreshButton");
+    const statusFilter = document.getElementById("statusFilter");
+
+    const totalCount = document.getElementById("totalCount");
+    const newCount = document.getElementById("newCount");
+    const processingCount = document.getElementById("processingCount");
+    const completedCount = document.getElementById("completedCount");
+
+    let allOrders = [];
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatStatus(status) {
+      return String(status || "NEW")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    function statusClass(status) {
+      const normalized = String(status || "NEW").toUpperCase();
+
+      if (normalized === "PROCESSING") {
+        return "status-processing";
+      }
+
+      if (normalized === "COMPLETED") {
+        return "status-completed";
+      }
+
+      if (normalized === "CANCELLED") {
+        return "status-cancelled";
+      }
+
+      return "status-new";
+    }
+
+    function showStatus(message, type = "info") {
+      dashboardStatus.textContent = message;
+      dashboardStatus.className =
+        "mb-5 rounded-xl p-4 text-sm font-semibold";
+
+      if (type === "error") {
+        dashboardStatus.classList.add(
+          "bg-red-100",
+          "text-red-800"
+        );
+      } else {
+        dashboardStatus.classList.add(
+          "bg-green-100",
+          "text-green-800"
+        );
+      }
+
+      dashboardStatus.classList.remove("hidden");
+    }
+
+    function hideStatus() {
+      dashboardStatus.classList.add("hidden");
+    }
+
+    function renderStats() {
+      const total = allOrders.length;
+
+      const newOrders = allOrders.filter(
+        order => String(order.status).toUpperCase() === "NEW"
+      ).length;
+
+      const processingOrders = allOrders.filter(
+        order => String(order.status).toUpperCase() === "PROCESSING"
+      ).length;
+
+      const completedOrders = allOrders.filter(
+        order => String(order.status).toUpperCase() === "COMPLETED"
+      ).length;
+
+      totalCount.textContent = total;
+      newCount.textContent = newOrders;
+      processingCount.textContent = processingOrders;
+      completedCount.textContent = completedOrders;
+    }
+
+
+    async function updateOrderStatus(orderId, newStatus) {
+      const allowedStatuses = [
+        "NEW",
+        "PROCESSING",
+        "COMPLETED",
+        "CANCELLED"
+      ];
+
+      const normalizedStatus =
+        String(newStatus || "").toUpperCase();
+
+      if (!allowedStatuses.includes(normalizedStatus)) {
+        showStatus(
+          "Invalid order status.",
+          "error"
+        );
+        return;
+      }
+
+      try {
+        showStatus(
+          `Updating order #${orderId}...`
+        );
+
+        const response = await fetch(
+          `/api/admin/orders/${encodeURIComponent(orderId)}/status`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({
+              status: normalizedStatus
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(
+            data.error || "Unable to update order status."
+          );
+        }
+
+        const order = allOrders.find(
+          item => String(item.id) === String(orderId)
+        );
+
+        if (order) {
+          order.status = normalizedStatus;
+        }
+
+        renderStats();
+        renderOrders();
+
+        showStatus(
+          `Order #${orderId} updated to ${formatStatus(normalizedStatus)}.`
+        );
+
+        return true;
+      } catch (error) {
+        showStatus(
+          error.message || "Unable to update order status.",
+          "error"
+        );
+
+        return false;
+      }
+    }
+
+    function renderOrders() {
+      const filter = statusFilter.value;
+
+      const visibleOrders = allOrders.filter(order => {
+        if (filter === "ALL") {
+          return true;
+        }
+
+        return String(order.status).toUpperCase() === filter;
+      });
+
+      ordersList.innerHTML = "";
+
+      if (!visibleOrders.length) {
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      visibleOrders.forEach(order => {
+        const card = document.createElement("article");
+
+        const status = String(order.status || "NEW").toUpperCase();
+
+        card.className =
+          "rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5";
+
+        card.innerHTML = `
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wide text-black/40">
+                Order #${escapeHtml(order.id)}
+              </p>
+
+              <h2 class="mt-1 text-lg font-bold text-[#8B1E1E]">
+                ${escapeHtml(order.customer_name)}
+              </h2>
+            </div>
+
+            <span
+              class="rounded-full px-3 py-1 text-xs font-bold ${statusClass(status)}"
+            >
+              ${escapeHtml(formatStatus(status))}
+            </span>
+          </div>
+
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-black/40">
+                Phone
+              </p>
+
+              <a
+                href="tel:${escapeHtml(order.phone)}"
+                class="mt-1 block font-semibold text-[#8B1E1E] underline"
+              >
+                ${escapeHtml(order.phone)}
+              </a>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-black/40">
+                Contact method
+              </p>
+
+              <p class="mt-1 font-semibold">
+                ${escapeHtml(formatStatus(order.contact_method))}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-black/40">
+                Event date
+              </p>
+
+              <p class="mt-1 font-semibold">
+                ${escapeHtml(order.event_date || "Not specified")}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-black/40">
+                Preferred order
+              </p>
+
+              <p class="mt-1 font-semibold">
+                ${escapeHtml(order.preferred_order || "Not specified")}
+              </p>
+            </div>
+
+          </div>
+
+          <div class="mt-4 rounded-xl bg-[#FFF8EC] p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-black/40">
+              Notes
+            </p>
+
+            <p class="mt-1 whitespace-pre-wrap text-sm leading-6">
+              ${escapeHtml(order.notes || "No additional notes.")}
+            </p>
+          </div>
+
+          <div class="mt-4 rounded-xl border border-black/10 bg-white p-4">
+            <label
+              for="order-status-${escapeHtml(order.id)}"
+              class="text-xs font-semibold uppercase tracking-wide text-black/40"
+            >
+              Change status
+            </label>
+
+            <select
+              id="order-status-${escapeHtml(order.id)}"
+              class="mt-2 w-full rounded-xl border border-black/10 bg-[#FFF8EC] px-3 py-3 text-sm font-bold outline-none focus:border-[#8B1E1E]"
+              data-order-status-id="${escapeHtml(order.id)}"
+              aria-label="Change status for order #${escapeHtml(order.id)}"
+            >
+              <option value="NEW" ${status === "NEW" ? "selected" : ""}>
+                New
+              </option>
+
+              <option value="PROCESSING" ${status === "PROCESSING" ? "selected" : ""}>
+                Processing
+              </option>
+
+              <option value="COMPLETED" ${status === "COMPLETED" ? "selected" : ""}>
+                Completed
+              </option>
+
+              <option value="CANCELLED" ${status === "CANCELLED" ? "selected" : ""}>
+                Cancelled
+              </option>
+            </select>
+          </div>
+
+          <div class="mt-4 border-t border-black/5 pt-3 text-xs text-black/45">
+            Created: ${escapeHtml(order.created_at || "Unknown")}
+          </div>
+        `;
+
+        ordersList.appendChild(card);
+
+        const statusSelect =
+          card.querySelector(
+            "[data-order-status-id]"
+          );
+
+        if (statusSelect) {
+          statusSelect.addEventListener(
+            "change",
+            async event => {
+              const select = event.currentTarget;
+
+              const orderId =
+                select.dataset.orderStatusId;
+
+              const previousStatus =
+                String(status || "NEW").toUpperCase();
+
+              const requestedStatus =
+                String(select.value || "").toUpperCase();
+
+              if (requestedStatus === previousStatus) {
+                return;
+              }
+
+              select.disabled = true;
+              select.setAttribute("aria-busy", "true");
+              select.dataset.previousStatus = previousStatus;
+              select.title = "Updating order status...";
+
+              const updated = await updateOrderStatus(
+                orderId,
+                requestedStatus
+              );
+
+              if (!updated) {
+                select.value = previousStatus;
+              }
+
+              select.disabled = false;
+              select.removeAttribute("aria-busy");
+              select.title = "";
+            }
+          );
+        }
+      });
+    }
+
+    async function loadOrders() {
+      refreshButton.disabled = true;
+      refreshButton.textContent = "Loading...";
+
+      try {
+        const response = await fetch("/api/admin/orders", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json"
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(
+            data.error || "Unable to load orders."
+          );
+        }
+
+        allOrders = Array.isArray(data.orders)
+          ? data.orders
+          : [];
+
+        renderStats();
+        renderOrders();
+
+        showStatus(
+          `Loaded ${allOrders.length} order${allOrders.length === 1 ? "" : "s"}.`
+        );
+      } catch (error) {
+        allOrders = [];
+        renderStats();
+        renderOrders();
+
+        showStatus(
+          error.message || "Unable to load orders.",
+          "error"
+        );
+      } finally {
+        refreshButton.disabled = false;
+        refreshButton.textContent = "Refresh";
+      }
+    }
+
+    refreshButton.addEventListener(
+      "click",
+      loadOrders
+    );
+
+    statusFilter.addEventListener(
+      "change",
+      renderOrders
+    );
+
+    loadOrders();
+  </script>
+
+</body>
+</html>

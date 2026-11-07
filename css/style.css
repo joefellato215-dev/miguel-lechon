@@ -1,0 +1,474 @@
+/*
+ * Miguel Lechon
+ * Custom site styles
+ *
+ * Tailwind handles the majority of layout/utilities.
+ * This file contains only reusable custom behavior and components.
+ */
+
+/* ==========================================================
+   GLOBAL
+========================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #FFF8EC;
+  color: #1F1A17;
+}
+
+::selection {
+  background: #E0A030;
+  color: #1F1A17;
+}
+
+/* Accessible keyboard focus */
+:focus-visible {
+  outline: 3px solid #E0A030;
+  outline-offset: 3px;
+}
+
+/* ==========================================================
+   HERO
+========================================================== */
+
+.hero-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(31, 26, 23, 0.90) 0%,
+      rgba(31, 26, 23, 0.68) 45%,
+      rgba(31, 26, 23, 0.20) 100%
+    );
+}
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+.cta-primary,
+.cta-secondary,
+.cta-outline {
+  display: inline-flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 16px 28px;
+  font-weight: 800;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.cta-primary {
+  background: #E0A030;
+  color: #1F1A17;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.20);
+}
+
+.cta-primary:hover {
+  background: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.cta-secondary {
+  border: 2px solid #FFFFFF;
+  background: rgba(255, 255, 255, 0.10);
+  color: #FFFFFF;
+  backdrop-filter: blur(8px);
+}
+
+.cta-secondary:hover {
+  background: #FFFFFF;
+  color: #1F1A17;
+  transform: translateY(-2px);
+}
+
+.cta-outline {
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  color: #FFFFFF;
+}
+
+.cta-outline:hover {
+  border-color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.secondary-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #8B1E1E;
+  border-radius: 9999px;
+  padding: 12px 24px;
+  color: #8B1E1E;
+  font-weight: 800;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.secondary-button:hover {
+  background: #8B1E1E;
+  color: #FFFFFF;
+}
+
+/* ==========================================================
+   MOBILE NAVIGATION
+========================================================== */
+
+.mobile-nav-link {
+  display: block;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 600;
+  transition: background-color 180ms ease;
+}
+
+.mobile-nav-link:hover {
+  background: rgba(139, 30, 30, 0.10);
+}
+
+/* ==========================================================
+   SECTION TYPOGRAPHY
+========================================================== */
+
+.section-eyebrow {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #8B1E1E;
+}
+
+.section-title {
+  margin-top: 12px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(2.25rem, 7vw, 3rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.section-description {
+  margin-top: 20px;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: rgba(31, 26, 23, 0.70);
+}
+
+/* ==========================================================
+   PRODUCT CARDS
+========================================================== */
+
+.product-card {
+  overflow: hidden;
+  border-radius: 24px;
+  background: #FFFFFF;
+  box-shadow: 0 12px 40px rgba(31, 26, 23, 0.10);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 45px rgba(31, 26, 23, 0.15);
+}
+
+.product-image {
+  display: block;
+  width: 100%;
+  height: 224px;
+  object-fit: cover;
+}
+
+.product-button {
+  display: block;
+  margin-top: 20px;
+  border-radius: 9999px;
+  background: #8B1E1E;
+  padding: 12px 20px;
+  text-align: center;
+  font-weight: 800;
+  color: #FFFFFF;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.product-button:hover {
+  background: #1F1A17;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================
+   HOW TO ORDER
+========================================================== */
+
+.step-number {
+  display: flex;
+  width: 64px;
+  height: 64px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  border-radius: 9999px;
+  background: #E0A030;
+  color: #1F1A17;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* ==========================================================
+   GALLERY
+========================================================== */
+
+.gallery-image {
+  display: block;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+  transition:
+    transform 250ms ease,
+    filter 250ms ease;
+}
+
+.gallery-image:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+/* ==========================================================
+   TESTIMONIALS
+========================================================== */
+
+.testimonial-card {
+  border-radius: 24px;
+  background: #FFF8EC;
+  padding: 28px;
+  box-shadow: 0 12px 40px rgba(31, 26, 23, 0.10);
+}
+
+.stars {
+  color: #E0A030;
+  letter-spacing: 0.08em;
+}
+
+/* ==========================================================
+   FAQ
+========================================================== */
+
+.faq-item {
+  border-radius: 16px;
+  background: #FFFFFF;
+  padding: 20px;
+  box-shadow: 0 4px 18px rgba(31, 26, 23, 0.06);
+}
+
+.faq-item summary {
+  position: relative;
+  cursor: pointer;
+  padding-right: 32px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  content: "+";
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #8B1E1E;
+}
+
+.faq-item[open] summary::after {
+  content: "−";
+}
+
+.faq-item p {
+  margin-top: 16px;
+  line-height: 1.75;
+  color: rgba(31, 26, 23, 0.70);
+}
+
+/* ==========================================================
+   CONTACT FORM
+========================================================== */
+
+.contact-label {
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #E0A030;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  border: 1px solid rgba(31, 26, 23, 0.20);
+  border-radius: 12px;
+  background: #FFFFFF;
+  padding: 12px 16px;
+  color: #1F1A17;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #8B1E1E;
+  box-shadow: 0 0 0 3px rgba(139, 30, 30, 0.12);
+}
+
+textarea.form-input {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.contact-option {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(31, 26, 23, 0.20);
+  border-radius: 12px;
+  background: #FFFFFF;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 800;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.peer:checked + .contact-option {
+  border-color: #8B1E1E;
+  background: #8B1E1E;
+  color: #FFFFFF;
+}
+
+/* ==========================================================
+   MAP
+========================================================== */
+
+.map-placeholder {
+  display: flex;
+  height: 256px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.10);
+  text-align: center;
+}
+
+/* ==========================================================
+   SCROLL REVEAL
+========================================================== */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================
+   MOBILE BOTTOM BAR
+========================================================== */
+
+.mobile-bottom-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(31, 26, 23, 0.10);
+  background: #FFFFFF;
+  box-shadow: 0 -10px 30px rgba(31, 26, 23, 0.12);
+}
+
+.mobile-action-call,
+.mobile-action-message {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 800;
+}
+
+.mobile-action-call {
+  background: #8B1E1E;
+  color: #FFFFFF;
+}
+
+.mobile-action-message {
+  background: #E0A030;
+  color: #1F1A17;
+}
+
+/* ==========================================================
+   TABLET / DESKTOP
+========================================================== */
+
+@media (min-width: 1024px) {
+  .mobile-bottom-bar {
+    display: none;
+  }
+}
+
+/* ==========================================================
+   REDUCED MOTION
+========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
